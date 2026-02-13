@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Игровой чат</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="nick-form">
+    <input id="nick-input" placeholder="Уникальный ник" maxlength="20">
+    <button id="nick-btn">Войти</button>
+  </div>
+
+  <div id="chat" style="display:none">
+    <div id="header">
+      <h2>Вы: <span id="my-nick"></span></h2>
+    </div>
+    <div id="users-panel">
+      <h3>Игроки онлайн (<span id="count">0</span>):</h3>
+      <ul id="user-list"></ul>
+    </div>
+    
+    <div id="chat-area">
+      <div id="tabs"></div>
+      <div id="messages"></div>
+      <form id="msg-form">
+        <input id="msg-input" placeholder="Сообщение в ЛС" disabled>
+        <button type="submit" disabled>Отправить</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
