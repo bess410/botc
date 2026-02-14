@@ -10,6 +10,9 @@ app.use(express.static('public'));
 
 const users = new Map(); // nick → socket.id
 const chatHistory = new Map(); // 'nick1-nick2' → [{from, msg, timestamp}]
+const usersIds = new Set();
+const userNicks = new Set();
+const ADMIN_PW = "444";
 
 function getChatKey(nick1, nick2) {
   return [nick1, nick2].sort().join('-');
@@ -17,6 +20,28 @@ function getChatKey(nick1, nick2) {
 
 io.on('connection', (socket) => {
   console.log('👤 Подключен:', socket.id);
+  usersIds.add(socket.id);
+
+  socket.on("admin_auth", (password) => {
+    if (password === ADMIN_PW) {
+      socket.emit("admin_auth_ok");
+    } else {
+      socket.emit("admin_auth_fail");
+    }
+  });
+
+  socket.on("add nick", (nick) => {
+    userNicks.add(nick);
+    sendUserNicks();
+  });
+
+  socket.on('get nicks', () => {
+    sendUserNicks();
+  });
+
+  socket.on('check nick', (nick) => {
+    socket.emit('load state', userNicks.has(nick) || nick === 'admin');
+  });
 
   socket.on('register', (nick) => {
     if (users.has(nick)) {
@@ -26,6 +51,9 @@ io.on('connection', (socket) => {
     users.set(nick, socket.id);
     socket.nick = nick;
     console.log(`✅ Зарегистрирован: ${nick} → ${socket.id}`);
+
+    userNicks.delete(nick);
+    sendUserNicks();
     
     // ✅ Отправляем историю всех чатов для этого пользователя
     const history = [];
@@ -83,6 +111,10 @@ io.on('connection', (socket) => {
     if (socket.nick) {
       console.log(`👋 ${socket.nick} отключился`);
       users.delete(socket.nick);
+      usersIds.delete(socket.id);
+
+      userNicks.add(socket.nick);
+      sendUserNicks();
       broadcastUsers();
     }
   });
@@ -91,6 +123,12 @@ io.on('connection', (socket) => {
 function broadcastUsers() {
   const userList = Array.from(users.keys());
   io.emit('user list', userList);
+}
+
+function sendUserNicks() {
+  Array.from(usersIds).forEach(id => {
+    io.to(id).emit('send user nicks', Array.from(userNicks));
+  });
 }
 
 server.listen(3000, () => console.log('🚀 http://localhost:3000'));

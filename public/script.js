@@ -4,20 +4,119 @@ let chats = {};
 let currentTab = null;
 let unreadChats = new Set();
 let tabOrder = []; // Порядок вкладок (LRU)
+const screens = ["role-screen", "nick-form", "chat", "admin-screen"];
 
-document.getElementById('nick-btn').onclick = () => {
+// состояние чата (роль, ник, открытые вкладки и т.д.)
+let appState = {
+  nick: '',
+};
+
+//Загружаем состояние после перезагрузки страницы
+window.addEventListener('load', () => {
+  loadState();
+});
+
+function saveState() {
+  localStorage.setItem('chatState', JSON.stringify(appState));
+}
+
+// восстанови состояние (при загрузке страницы)
+function loadState() {
+  const saved = localStorage.getItem('chatState');
+  if (saved) {
+    appState = { ...appState, ...JSON.parse(saved) };
+    socket.emit('check nick', appState.nick);
+  } else {
+    show("role-screen");
+  }
+}
+
+socket.on('load state', (success) => {
+  if(success) {
+    const saved = localStorage.getItem('chatState');
+    appState = { ...appState, ...JSON.parse(saved) };
+    
+    // примени состояние
+    
+    if(appState.nick === 'admin') {
+      show("admin-screen");
+    } else if (appState.nick !== '') {
+      socket.emit('register', appState.nick);
+    } else {
+      show("role-screen");
+    }
+  } else {
+    appState.nick = '';
+    saveState();
+    show("role-screen");
+  }
+});
+
+function show(id) {
+  screens.forEach(s => (document.getElementById(s).style.display = "none"));
+  const panelToShow = document.getElementById(id);
+  if(id === 'chat') {
+    panelToShow.style.display = "flex";
+  } else {
+    panelToShow.style.display = "block";
+  }
+}
+
+show('role-screen');
+
+// Обработка событий
+document.getElementById('nick-btn').addEventListener("click", () => {
   const nick = document.getElementById('nick-input').value.trim();
   if (!nick) return alert('Введи ник!');
   socket.emit('register', nick);
+  appState.nick = nick;
+  saveState();
+});
+
+document.getElementById("role-player").addEventListener("click", () => {
+  show("nick-form");
+  socket.emit('get nicks');
+});
+
+document.getElementById("role-admin").addEventListener("click", () => {
+  show("admin-screen");
+});
+
+document.getElementById("admin-login").addEventListener("click", () => {
+  const pw = document.getElementById("admin-password").value;
+  if (!pw) return;
+
+  // отправь пароль на сервер
+  socket.emit("admin_auth", pw);
+  appState.nick = 'admin';
+  saveState();
+});
+
+document.getElementById('add_nick_form').onsubmit = (e) => {
+  e.preventDefault();
+  const nick = document.getElementById('add_nick').value.trim();
+  if (!nick) return alert('Введи ник!');
+  socket.emit('add nick', nick);
+  document.getElementById('add_nick').value = '';
 };
+
+// обработка ответа сервера
+socket.on("admin_auth_ok", () => {
+  document.getElementById("admin-tools").style.display = "block";
+  document.getElementById("admin-password").style.display = "none";
+  document.getElementById("admin-login").style.display = "none";
+});
+
+socket.on("admin_auth_fail", () => {
+  alert("Неверный пароль!");
+});
 
 socket.on('nick error', (err) => alert(err));
 
 socket.on('registered', (nick) => {
+  show("chat");
   currentNick = nick;
   document.getElementById('my-nick').textContent = nick;
-  document.getElementById('nick-form').style.display = 'none';
-  document.getElementById('chat').style.display = 'flex';
   document.getElementById('msg-input').disabled = false;
   document.querySelector('button[type=submit]').disabled = false;
 });
@@ -34,6 +133,19 @@ socket.on('user list', (userList) => {
     setTimeout(() => {
         updateUserList(userList);
     }, 200);
+});
+
+socket.on('send user nicks', (userList) => {
+    const select = document.getElementById('nick-input');
+  select.innerHTML = '';  // очисти старые опции
+
+  // заполни из userList (массив строк ников)
+  userList.forEach(nick => {
+    const option = document.createElement('option');
+    option.value = nick;
+    option.textContent = nick;
+    select.appendChild(option);
+  });
 });
 
 function updateUserList(userList) {

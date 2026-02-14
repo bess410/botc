@@ -5,8 +5,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="nick-form">
-    <input id="nick-input" placeholder="Уникальный ник" maxlength="20">
+  <div id="role-screen">
+    <button id="role-player">Зайти как игрок</button>
+    <button id="role-admin">Зайти как админ</button>
+  </div>
+
+  <div id="admin-screen" style="display:none">
+    <h2>Админ-панель</h2>
+    <input id="admin-password" type="password" placeholder="Пароль админа">
+    <button id="admin-login">Войти как админ</button>
+    <div id="admin-tools" style="display:none">
+      <form id="add_nick_form">
+        <input id="add_nick" placeholder="Введи ник" maxlength="20"></select>
+        <button id="add_nick_btn">Добавить игрока</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="nick-form" style="display:none">
+    <select id="nick-input" placeholder="Уникальный ник" maxlength="20"></select>
     <button id="nick-btn">Войти</button>
   </div>
 
