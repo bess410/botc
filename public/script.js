@@ -38,9 +38,7 @@ socket.on('load state', (success) => {
     
     // примени состояние
     
-    if(appState.nick === 'admin') {
-      show("admin-screen");
-    } else if (appState.nick !== '') {
+    if(appState.nick !== '') {
       socket.emit('register', appState.nick);
     } else {
       show("role-screen");
@@ -52,14 +50,13 @@ socket.on('load state', (success) => {
   }
 });
 
-function show(id) {
+function show(...ids) {
   screens.forEach(s => (document.getElementById(s).style.display = "none"));
-  const panelToShow = document.getElementById(id);
-  if(id === 'chat') {
-    panelToShow.style.display = "flex";
-  } else {
-    panelToShow.style.display = "block";
-  }
+  ids.forEach(id => {
+    const panel = document.getElementById(id);
+    const displayType = id === 'chat' ? 'flex' : 'block';
+    panel.style.display = displayType;
+  });
 }
 
 show('role-screen');
@@ -100,6 +97,14 @@ document.getElementById('add_nick_form').onsubmit = (e) => {
   document.getElementById('add_nick').value = '';
 };
 
+document.getElementById('remove_nick_form').onsubmit = (e) => {
+  e.preventDefault();
+  const nick = document.getElementById('remove_nick').value.trim();
+  if (!nick) return alert('Введи ник!');
+  socket.emit('remove nick', nick);
+  document.getElementById('remove_nick').value = '';
+};
+
 // обработка ответа сервера
 socket.on("admin_auth_ok", () => {
   document.getElementById("admin-tools").style.display = "block";
@@ -114,7 +119,11 @@ socket.on("admin_auth_fail", () => {
 socket.on('nick error', (err) => alert(err));
 
 socket.on('registered', (nick) => {
-  show("chat");
+  if(nick === 'admin') {
+    show('admin-screen', 'chat');
+  } else {
+    show("chat");
+  }
   currentNick = nick;
   document.getElementById('my-nick').textContent = nick;
   document.getElementById('msg-input').disabled = false;

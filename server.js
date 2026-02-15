@@ -11,7 +11,7 @@ app.use(express.static('public'));
 const users = new Map(); // nick → socket.id
 const chatHistory = new Map(); // 'nick1-nick2' → [{from, msg, timestamp}]
 const usersIds = new Set();
-const userNicks = new Set();
+const userNicks = new Set(['admin']);
 const ADMIN_PW = "444";
 
 function getChatKey(nick1, nick2) {
@@ -35,12 +35,25 @@ io.on('connection', (socket) => {
     sendUserNicks();
   });
 
+  socket.on("remove nick", (nick) => {
+    if (nick) {
+      console.log(`👋 ${nick} отключился`);
+      const socketId = users.get(nick);
+      users.delete(nick);
+      usersIds.delete(socketId);
+
+      userNicks.delete(nick);
+      socket.to(socketId).emit('load state', userNicks.has(nick));
+      sendUserNicks();
+    }
+  });
+
   socket.on('get nicks', () => {
     sendUserNicks();
   });
 
   socket.on('check nick', (nick) => {
-    socket.emit('load state', userNicks.has(nick) || nick === 'admin');
+    socket.emit('load state', userNicks.has(nick));
   });
 
   socket.on('register', (nick) => {
@@ -127,7 +140,7 @@ function broadcastUsers() {
 
 function sendUserNicks() {
   Array.from(usersIds).forEach(id => {
-    io.to(id).emit('send user nicks', Array.from(userNicks));
+    io.emit('send user nicks', Array.from(userNicks));
   });
 }
 
