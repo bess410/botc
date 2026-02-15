@@ -33,13 +33,12 @@ io.on('connection', (socket) => {
   socket.on("add nick", (nick) => {
     if(socket.nick === 'admin'){
       userNicks.add(nick);
-    sendUserNicks();
+      sendUserNicks();
     }
   });
 
   socket.on("remove nick", (nick) => {
     if (nick && socket.nick === 'admin') {
-      console.log(`👋 ${nick} отключился`);
       const socketId = users.get(nick);
       users.delete(nick);
       usersIds.delete(socketId);
@@ -55,7 +54,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('check nick', (nick) => {
-    socket.emit('load state', userNicks.has(nick));
+    socket.emit('load state', userNicks.has(nick) && nick !== 'admin');
   });
 
   socket.on('register', (nick) => {

@@ -17,6 +17,22 @@ body {
   text-align: center;
 }
 
+#role-screen {
+  display: flex;
+  gap: 10px;
+}
+
+#admin-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+#admin-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 #nick-input {
   width: 200px;
   padding: 10px;

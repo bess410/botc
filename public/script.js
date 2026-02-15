@@ -54,8 +54,7 @@ function show(...ids) {
   screens.forEach(s => (document.getElementById(s).style.display = "none"));
   ids.forEach(id => {
     const panel = document.getElementById(id);
-    const displayType = id === 'chat' ? 'flex' : 'block';
-    panel.style.display = displayType;
+    panel.style.display = 'flex';
   });
 }
 
@@ -65,9 +64,11 @@ show('role-screen');
 document.getElementById('nick-btn').addEventListener("click", () => {
   const nick = document.getElementById('nick-input').value.trim();
   if (!nick) return alert('Введи ник!');
-  socket.emit('register', nick);
-  appState.nick = nick;
-  saveState();
+  if(nick !== 'admin'){
+    socket.emit('register', nick);
+    appState.nick = nick;
+    saveState();
+  }
 });
 
 document.getElementById("role-player").addEventListener("click", () => {
@@ -76,7 +77,7 @@ document.getElementById("role-player").addEventListener("click", () => {
 });
 
 document.getElementById("role-admin").addEventListener("click", () => {
-  show("admin-screen");
+  show("admin-screen", "admin-password", "admin-login");
 });
 
 document.getElementById("admin-login").addEventListener("click", () => {
@@ -85,8 +86,6 @@ document.getElementById("admin-login").addEventListener("click", () => {
 
   // отправь пароль на сервер
   socket.emit("admin_auth", pw);
-  appState.nick = 'admin';
-  saveState();
 });
 
 document.getElementById('add_nick_form').onsubmit = (e) => {
@@ -107,6 +106,8 @@ document.getElementById('remove_nick_form').onsubmit = (e) => {
 
 // обработка ответа сервера
 socket.on("admin_auth_ok", () => {
+  appState.nick = 'admin';
+  saveState();
   socket.emit('register', appState.nick);
 });
 
@@ -147,7 +148,9 @@ socket.on('send user nicks', (userList) => {
   select.innerHTML = '';  // очисти старые опции
 
   // заполни из userList (массив строк ников)
-  userList.forEach(nick => {
+  userList
+    .filter(nick => nick !== 'admin')
+    .forEach(nick => {
     const option = document.createElement('option');
     option.value = nick;
     option.textContent = nick;
