@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
   usersIds.add(socket.id);
 
   socket.on("admin_auth", (password) => {
-    if (password === ADMIN_PW) {
+    if (password === ADMIN_PW && userNicks.has('admin')) {
       socket.emit("admin_auth_ok");
     } else {
       socket.emit("admin_auth_fail");
@@ -31,12 +31,14 @@ io.on('connection', (socket) => {
   });
 
   socket.on("add nick", (nick) => {
-    userNicks.add(nick);
+    if(socket.nick === 'admin'){
+      userNicks.add(nick);
     sendUserNicks();
+    }
   });
 
   socket.on("remove nick", (nick) => {
-    if (nick) {
+    if (nick && socket.nick === 'admin') {
       console.log(`👋 ${nick} отключился`);
       const socketId = users.get(nick);
       users.delete(nick);

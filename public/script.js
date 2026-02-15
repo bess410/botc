@@ -4,7 +4,7 @@ let chats = {};
 let currentTab = null;
 let unreadChats = new Set();
 let tabOrder = []; // Порядок вкладок (LRU)
-const screens = ["role-screen", "nick-form", "chat", "admin-screen"];
+const screens = ["role-screen", "nick-form", "chat", "admin-screen", "admin-tools", "admin-password", "admin-login"];
 
 // состояние чата (роль, ник, открытые вкладки и т.д.)
 let appState = {
@@ -107,9 +107,7 @@ document.getElementById('remove_nick_form').onsubmit = (e) => {
 
 // обработка ответа сервера
 socket.on("admin_auth_ok", () => {
-  document.getElementById("admin-tools").style.display = "block";
-  document.getElementById("admin-password").style.display = "none";
-  document.getElementById("admin-login").style.display = "none";
+  socket.emit('register', appState.nick);
 });
 
 socket.on("admin_auth_fail", () => {
@@ -120,7 +118,7 @@ socket.on('nick error', (err) => alert(err));
 
 socket.on('registered', (nick) => {
   if(nick === 'admin') {
-    show('admin-screen', 'chat');
+    show('admin-screen', 'admin-tools', 'chat');
   } else {
     show("chat");
   }
