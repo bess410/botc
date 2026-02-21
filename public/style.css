@@ -57,20 +57,10 @@ body {
 
 /* Основной чат */
 #chat {
+  display: flex;
   max-width: 800px;
   margin: 0 auto;
   display: flex;
-  gap: 20px;
-}
-
-/* Заголовок */
-#header {
-  flex: 1;
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  text-align: center;
 }
 
 /* Панель игроков */
@@ -139,6 +129,7 @@ body {
 
 /* Сообщения */
 #messages {
+  flex-grow: 1;
   background: white;
   overflow-y: auto;
   padding: 20px;
@@ -225,9 +216,5 @@ button[type=submit]:hover {
   
   #chat-area {
     order: 2;
-  }
-  
-  #header {
-    order: 1;
   }
 }
