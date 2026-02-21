@@ -3,7 +3,6 @@ let currentNick = null;
 let chats = {};
 let currentTab = null;
 let unreadChats = new Set();
-let tabOrder = []; // Порядок вкладок (LRU)
 const screens = ["role-screen", "nick-form", "chat", "admin-screen", "admin-tools", "admin-password", "admin-login"];
 
 // состояние чата (роль, ник, открытые вкладки и т.д.)
@@ -144,7 +143,7 @@ socket.on('user list', (userList) => {
 });
 
 socket.on('send user nicks', (userList) => {
-    const select = document.getElementById('nick-input');
+  const select = document.getElementById('nick-input');
   select.innerHTML = '';  // очисти старые опции
 
   // заполни из userList (массив строк ников)
@@ -175,9 +174,7 @@ function updateUserList(userList) {
     li.onclick = () => openChat(user);
     
     if (unreadChats.has(user) && currentTab !== user) {
-      li.style.background = '#ff4444';
-      li.style.color = 'white';
-      li.classList.add('unread'); // Для CSS
+      li.classList.add('unread');
     }
     
     list.appendChild(li);
@@ -189,35 +186,13 @@ function openChat(target) {
   unreadChats.delete(target);
   currentTab = target;
   
-  // LRU: обновляем порядок вкладок
-  const tabIndex = tabOrder.indexOf(target);
-  if (tabIndex > -1) {
-    tabOrder.splice(tabIndex, 1); // Удаляем старое
-  }
-  tabOrder.unshift(target); // В начало
-  
-  // Закрываем лишние вкладки
-  while (tabOrder.length > 3) {
-    const closedTab = tabOrder.pop();
-    // delete chats[closedTab];
-    document.querySelector(`.tab[data-target="${closedTab}"]`)?.remove();
-  }
-  
-  // Вкладки UI
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  
-  let tab = Array.from(document.querySelectorAll('.tab')).find(t => t.dataset.target === target);
-  if (!tab) {
-    tab = document.createElement('button');
-    tab.className = 'tab active';
-    tab.dataset.target = target;
-    tab.textContent = target;
-    tab.onclick = () => openChat(target);
-    document.getElementById('tabs').appendChild(tab);
-  } else {
-    tab.classList.add('active');
-    tab.classList.remove('unread');
-  }
+  let tab = document.createElement('button');
+  tab.id = 'tab';
+  tab.dataset.target = target;
+  tab.textContent = target;
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  tabs.appendChild(tab);
   
   socket.emit('user list request');
   
@@ -260,11 +235,6 @@ socket.on('private message', ({ from, msg, to }) => {
     addMessage(`${from}: ${msg}`, from === currentNick ? 'from-me' : 'from-other');
   } else {
     unreadChats.add(chatUser);
-    
-    const tab = Array.from(document.querySelectorAll('.tab')).find(t => t.dataset.target === chatUser);
-    if (tab) {
-      tab.classList.add('unread');
-    }
     
     refreshUserListStyles(); // 🔥 Красные наверх
   }
