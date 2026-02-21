@@ -211,7 +211,7 @@ function refreshUserListStyles() {
   socket.emit('user list request'); // Сервер обновит список с правильным порядком
 }
 
-document.getElementById('msg-form').onsubmit = (e) => {
+document.getElementById('msg-form').addEventListener('submit', function(e) {
   e.preventDefault();
   if (!currentNick || !currentTab) return;
   
@@ -220,7 +220,8 @@ document.getElementById('msg-form').onsubmit = (e) => {
   
   socket.emit('private message', { to: currentTab, msg });
   document.getElementById('msg-input').value = '';
-};
+  document.getElementById('msg-input').focus();
+});
 
 socket.on('private message', ({ from, msg, to }) => { 
   const chatUser = from === currentNick ? to : from;
