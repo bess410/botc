@@ -6,7 +6,6 @@
 /* Базовые стили */
 body {
   font-family: Arial, sans-serif;
-  margin: 20px;
   background: #f0f0f0;
 }
 
@@ -58,9 +57,12 @@ body {
 /* Основной чат */
 #chat {
   display: flex;
+  flex-direction: column;  /* Вертикальный для чата */
   max-width: 800px;
+  width: 100%;  /* Полная ширина */
+  height: 100vh;  /* Полная высота экрана */
   margin: 0 auto;
-  display: flex;
+  box-sizing: border-box;
 }
 
 /* Панель игроков */
@@ -206,9 +208,12 @@ button[type=submit]:hover {
 /* Адаптивность */
 @media (max-width: 768px) {
   #chat {
-    flex-direction: column;
+    max-width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 10px; 
   }
-  
+/*   
   #users-panel {
     width: 100%;
     order: 3;
@@ -216,5 +221,5 @@ button[type=submit]:hover {
   
   #chat-area {
     order: 2;
-  }
+  } */
 }
