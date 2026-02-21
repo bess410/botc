@@ -122,6 +122,7 @@ socket.on('registered', (nick) => {
   } else {
     show("chat");
   }
+  currentNick = nick;
 });
 
 socket.on('chat history', (history) => {
