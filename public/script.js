@@ -122,10 +122,6 @@ socket.on('registered', (nick) => {
   } else {
     show("chat");
   }
-  currentNick = nick;
-  document.getElementById('my-nick').textContent = nick;
-  document.getElementById('msg-input').disabled = false;
-  document.querySelector('button[type=submit]').disabled = false;
 });
 
 socket.on('chat history', (history) => {
