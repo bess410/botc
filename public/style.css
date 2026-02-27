@@ -132,6 +132,8 @@ body {
 
 /* Сообщения */
 #messages {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   max-height: calc(100vh - 205px);
   background: white;
@@ -140,6 +142,8 @@ body {
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   margin-bottom: 0;
 }
+
+
 
 #msg-form {
   display: flex;
@@ -190,6 +194,10 @@ button[type=submit]:hover {
   max-width: 80%;
   word-wrap: break-word;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.msg:first-child {
+  margin-top: auto;
 }
 
 .from-me {
