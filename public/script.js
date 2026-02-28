@@ -211,8 +211,7 @@ function refreshUserListStyles() {
   socket.emit('user list request'); // Сервер обновит список с правильным порядком
 }
 
-document.getElementById('msg-form').addEventListener('submit', function(e) {
-  e.preventDefault();
+document.getElementById('msg-form-submit').addEventListener('click', function(e) {
   if (!currentNick || !currentTab) return;
   
   const msg = document.getElementById('msg-input').value.trim();
